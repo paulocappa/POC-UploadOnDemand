@@ -2,11 +2,10 @@
   {
     "name": "default",
     "type": "postgres",
-    "host": "localhost",
     "port": 5432,
     "username": "postgres",
-    "password": "docker",
-    "database": "my_database",
+    "password": "postgres",
+    "database": "on_demand",
     "entities": ["./src/modules/**/infra/typeorm/entities/*.ts"],
     "migrations": ["./src/shared/infra/typeorm/migrations/*.ts"],
     "cli": {
@@ -14,11 +13,10 @@
     }
   },
   {
-    "name": "mongo",
+    "name": "mongodb",
     "type": "mongodb",
-    "host": "localhost",
     "port": 27017,
-    "database": "my_database",
+    "database": "on_demand",
     "useUnifiedTopology": true,
     "entities": ["./src/modules/**/infra/typeorm/schemas/*.ts"]
   }
