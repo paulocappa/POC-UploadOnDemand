@@ -6,12 +6,12 @@ interface IUploadConfig {
   driver: 'disk' | 'heroku';
 
   tmpFolder: string;
-  uploadsFolder: string;
+  thumbsFolder: string;
 }
 
 export default {
   driver: process.env.STORAGE_DRIVER,
 
   tmpFolder,
-  uploadsFolder: path.resolve(tmpFolder, 'uploads'),
+  thumbsFolder: path.resolve(tmpFolder, 'thumbnails'),
 } as IUploadConfig;

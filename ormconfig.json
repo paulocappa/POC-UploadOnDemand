@@ -1,18 +1,5 @@
 [
   {
-    "name": "default",
-    "type": "postgres",
-    "port": 5432,
-    "username": "postgres",
-    "password": "postgres",
-    "database": "on_demand",
-    "entities": ["./src/modules/**/infra/typeorm/entities/*.ts"],
-    "migrations": ["./src/shared/infra/typeorm/migrations/*.ts"],
-    "cli": {
-      "migrationsDir": "./src/shared/infra/typeorm/migrations"
-    }
-  },
-  {
     "name": "mongodb",
     "type": "mongodb",
     "port": 27017,

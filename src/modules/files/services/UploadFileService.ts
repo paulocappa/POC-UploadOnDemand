@@ -5,12 +5,13 @@ import { extname } from 'node:path';
 
 import IStorageProvider from '@shared/container/providers/StorageProvider/models/IStorageProvider';
 import generateFilename from '@shared/utils/generateFilename';
+import IThumbnailProvider from '@shared/container/providers/ThumbnailProvider/models/IThumbnailProvider';
 import IFilesRepository from '../repositories/IFilesRepository';
+import Files from '../infra/typeorm/schemas/Files';
 
 interface IRequest {
-  user_id: string;
-  socket_id: string;
   file: Readable;
+  type: string;
   original_name: string;
 }
 
@@ -22,23 +23,39 @@ class UploadFileService {
 
     @inject('FilesRepository')
     private filesRepository: IFilesRepository,
+
+    @inject('ThumbnailProvider')
+    private thumbnailProvider: IThumbnailProvider,
   ) {}
 
   public async execute({
-    user_id,
-    socket_id,
     file,
+    type,
     original_name,
-  }: IRequest): Promise<void> {
+  }: IRequest): Promise<Files> {
     const filename = `${generateFilename()}${extname(original_name)}`;
 
     const filesize = await this.storageProvider.saveFile({
       file,
       filename,
-      socket_id,
     });
 
-    await this.filesRepository.create({ user_id, filename, filesize });
+    let thumbnail = null;
+
+    if (type.includes('video/')) {
+      thumbnail = await this.thumbnailProvider.generate({
+        filename,
+      });
+    }
+
+    const fileData = await this.filesRepository.create({
+      filename,
+      filesize,
+      type,
+      thumbnail,
+    });
+
+    return fileData;
   }
 }
 

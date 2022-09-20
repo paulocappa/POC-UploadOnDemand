@@ -6,43 +6,57 @@ import { pipeline } from 'node:stream/promises';
 
 import ListFileService from '@modules/files/services/ListFileService';
 import UploadFileService from '@modules/files/services/UploadFileService';
+import DeleteFileService from '@modules/files/services/DeleteFileService';
 
 class FilesController {
   public async create(req: Request, res: Response): Promise<void> {
-    const { user_id, busboy } = req;
-    const { socketId } = req.query;
+    const { busboy } = req;
 
     const uploadFileService = container.resolve(UploadFileService);
 
     busboy
       .on('file', async (_, file, info) => {
-        const { filename: original_name } = info;
+        const { filename: original_name, mimeType } = info;
 
-        await uploadFileService.execute({
-          user_id,
-          socket_id: socketId as string,
+        const fileData = await uploadFileService.execute({
           file,
+          type: mimeType,
           original_name,
         });
+
+        return res.status(200).json(instanceToInstance(fileData));
       })
       .on('error', error => {
-        console.error(error);
-      })
-      .on('finish', () => {
-        res.status(204).json({});
+        return res.status(400).json(error);
       });
 
     await pipeline(req, busboy);
   }
 
   public async list(req: Request, res: Response): Promise<Response> {
-    const { user_id } = req;
+    const { page, per_page } = req.query;
 
     const listFileService = container.resolve(ListFileService);
 
-    const files = await listFileService.execute(user_id);
+    const { files, pagination } = await listFileService.execute({
+      page: Number(page) || 1,
+      per_page: Number(per_page) || 10,
+    });
 
-    return res.json(instanceToInstance(files));
+    return res.json({
+      files: instanceToInstance(files),
+      pagination,
+    });
+  }
+
+  public async delete(req: Request, res: Response): Promise<Response> {
+    const { id } = req.params;
+
+    const deleteFileService = container.resolve(DeleteFileService);
+
+    await deleteFileService.execute(id);
+
+    return res.status(204).json({});
   }
 }
 

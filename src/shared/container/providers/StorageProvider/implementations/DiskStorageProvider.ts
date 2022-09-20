@@ -11,15 +11,11 @@ import IStorageProvider from '../models/IStorageProvider';
 import handleOnData from '../utils/handleOnData';
 
 class DiskStorageProvider implements IStorageProvider {
-  public async saveFile({
-    file,
-    filename,
-    socket_id,
-  }: ISaveFileDTO): Promise<number> {
+  public async saveFile({ file, filename }: ISaveFileDTO): Promise<number> {
     const filePath = path.join(uploadConfig.tmpFolder, filename);
     const writableStream = createWriteStream(filePath);
 
-    await pipeline(file, handleOnData({ filename, socket_id }), writableStream);
+    await pipeline(file, handleOnData({ filename }), writableStream);
 
     const filesize = writableStream.bytesWritten;
 

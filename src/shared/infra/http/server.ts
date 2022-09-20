@@ -1,10 +1,10 @@
 import 'reflect-metadata';
 import 'dotenv/config';
 
-import { Server } from 'socket.io';
 import express, { Request, Response, NextFunction } from 'express';
 
 import http from 'node:http';
+import cors from 'cors';
 
 import 'express-async-errors';
 
@@ -18,13 +18,14 @@ import routes from './routes';
 
 const app = express();
 const server = http.createServer(app);
-const io = new Server(server);
 
+app.use(cors());
 app.use(express.json());
 
 app.use(routes);
 
 app.use('/file', express.static(uploadConfig.tmpFolder));
+app.use('/thumb', express.static(uploadConfig.thumbsFolder));
 
 app.use((err: Error, _: Request, res: Response, __: NextFunction) => {
   if (err instanceof AppError) {
@@ -38,15 +39,6 @@ app.use((err: Error, _: Request, res: Response, __: NextFunction) => {
   return res.status(500).json({
     status: 'internal error',
     message: 'Internal Server Error',
-  });
-});
-
-io.on('connection', socket => {
-  console.log('socket', socket);
-
-  socket.on('disconnect', () => {
-    console.log('User disconnected');
-    socket.disconnect(true);
   });
 });
 
